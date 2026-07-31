@@ -10,17 +10,30 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
-import tensorflow as tf
 import streamlit as st
+import tensorflow as tf
+import os
+
+# Force Keras to use legacy mode if available
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 @st.cache_resource
 def load_model():
     model_path = "models/mobilenetv3_transfer.keras"
-    # compile=False bypasses optimizer/loss function deserialization issues
-    return tf.keras.models.load_model(model_path, compile=False)
+    
+    # Pass safe custom objects context for MobileNetV3 deserialization
+    try:
+        import tf_keras
+        return tf_keras.models.load_model(model_path, compile=False)
+    except Exception:
+        # Fallback to tf.keras with custom object bypass
+        return tf.keras.models.load_model(
+            model_path, 
+            compile=False,
+            safe_mode=False
+        )
 
 model = load_model()
-
 # --- Prediction Function (similar to your notebook) ---
 def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
     img_resized = img.resize(image_size)
