@@ -10,30 +10,38 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
+import os
+# Must be set BEFORE importing tensorflow
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import streamlit as st
 import tensorflow as tf
-import os
-
-# Force Keras to use legacy mode if available
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 @st.cache_resource
 def load_model():
     model_path = "models/mobilenetv3_transfer.keras"
     
-    # Pass safe custom objects context for MobileNetV3 deserialization
+    # Try tf_keras first for Keras 2 back-compatibility
     try:
         import tf_keras
         return tf_keras.models.load_model(model_path, compile=False)
     except Exception:
-        # Fallback to tf.keras with custom object bypass
-        return tf.keras.models.load_model(
-            model_path, 
-            compile=False,
-            safe_mode=False
-        )
+        pass
 
-model = load_model()
+    # Direct fallback passing safe_mode=False to allow MobileNet custom layers
+    return tf.keras.models.load_model(
+        model_path, 
+        compile=False,
+        safe_mode=False
+    )
+
+st.title("Tomato Plant Disease Detector")
+
+try:
+    model = load_model()
+    st.success("Model loaded successfully!")
+except Exception as e:
+    st.error(f"Error loading model: {e}")
 # --- Prediction Function (similar to your notebook) ---
 def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
     img_resized = img.resize(image_size)
