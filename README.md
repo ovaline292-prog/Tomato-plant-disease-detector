@@ -33,3 +33,13 @@ This repository contains an end-to-end Machine Learning pipeline and web applica
 └── dataset/                    # Local training & validation images
     ├── Healthy/
     └── Yellow_Leaf_Curl/
+Done
+1. 22/EG/PE/1521
+ASUQUO ELISHA MENEH
+2. 22/EG/PE/1471, Antigha, Gospel Fidelis
+3. 23/EG/PE/031
+ESHIETT PROMISE ODUDU
+4. 23/EG/PE/011
+5. IHEDI, SUCCESS CHIEMELA
+Sunday, Saviour Aniefiok 
+22/EG/PE/1541
