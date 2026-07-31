@@ -10,14 +10,14 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
+import tensorflow as tf
+import streamlit as st
+
 @st.cache_resource
 def load_model():
-    model_path = 'models/mobilenetv3_transfer.keras'
-    if not os.path.exists(model_path):
-        st.error(f"Error: Model file not found at {model_path}. Please ensure it's in your repository.")
-        st.stop()
-    model = tf.keras.models.load_model(model_path)
-    return model
+    model_path = "models/mobilenetv3_transfer.keras"
+    # compile=False bypasses optimizer/loss function deserialization issues
+    return tf.keras.models.load_model(model_path, compile=False)
 
 model = load_model()
 
