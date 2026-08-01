@@ -67,8 +67,6 @@ st.markdown("--- Source Code ---")
 st.code("""
 # This Streamlit app loads the saved 'custom_cnn.keras' model.
 """)
-'''
-
 # Define the path in Google Drive
 drive_path = '/content/drive/MyDrive/'
 streamlit_file_path = os.path.join(drive_path, 'streamlit.py')
