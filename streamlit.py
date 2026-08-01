@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 import os
 import pandas as pd
+import keras
 
 # --- Configuration & Setup ---
 IMAGE_HEIGHT = 128
@@ -44,12 +45,19 @@ class CustomDense(tf.keras.layers.Dense):
 
 # --- Safe Model Loader ---
 @st.cache_resource
-def load_model(model_path):
-    """Loads a Keras model while passing registered custom object overrides."""
-    custom_objects = {
-        'Dense': CustomDense
-    }
-    return tf.keras.models.load_model(model_path, custom_objects=custom_objects, safe_mode=False)
+def load_model_file(model_path):
+    try:
+        # Using native keras loader with compile=False completely ignores 
+        # training/quantization metadata causing the deserialization error.
+        return keras.models.load_model(model_path, compile=False, safe_mode=False)
+    except Exception as e:
+        # Secondary fallback if Keras 3 native fails
+        return tf.keras.models.load_model(
+            model_path, 
+            custom_objects={'Dense': tf.keras.layers.Dense}, 
+            compile=False, 
+            safe_mode=False
+        )
 
 
 def check_input_shape(name, model):
