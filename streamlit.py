@@ -10,13 +10,61 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model ---
+import streamlit as st
 import keras
+from keras import layers, models
+import numpy as np
+from PIL import Image
+import os
 
+# --- Configuration ---
+IMAGE_HEIGHT = 128
+IMAGE_WIDTH = 128
+CLASS_NAMES = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
+
+# --- Rebuild Custom CNN Architecture ---
+def build_custom_cnn():
+    """
+    Rebuild the exact CNN architecture used during training.
+    Adjust layer parameters below if yours differed!
+    """
+    model = models.Sequential([
+        layers.Input(shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 3)),
+        layers.Rescaling(1./255),  # Rescaling layer included inside model
+        
+        layers.Conv2D(32, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Conv2D(128, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(len(CLASS_NAMES), activation='softmax')  # or activation='sigmoid' if output is 1 unit
+    ])
+    return model
+
+# --- Load Model & Weights safely ---
 @st.cache_resource
-def load_model():
-    return keras.models.load_model('models/custom_cnn.keras', safe_mode=False)
+def load_disease_model():
+    model_path = 'models/custom_cnn.keras'
+    if not os.path.exists(model_path):
+        st.error(f"Error: Model file not found at {model_path}.")
+        st.stop()
+        
+    try:
+        # First attempt standard loading
+        return keras.models.load_model(model_path, compile=False, safe_mode=False)
+    except Exception:
+        # Fallback: Build architecture manually and load weights from the .keras archive
+        model = build_custom_cnn()
+        model.load_weights(model_path)
+        return model
 
-model = load_model()
+model = load_disease_model()
 
 # --- Prediction Function ---
 def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
