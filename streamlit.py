@@ -10,15 +10,11 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model ---
+import keras
+
 @st.cache_resource
 def load_model():
-    model_path = 'models/custom_cnn.keras'
-    if not os.path.exists(model_path):
-        st.error(f"Error: Model file not found at {model_path}. Please ensure it's in your repository.")
-        st.stop()
-    # Using tf.keras.models.load_model is crucial for Keras models saved with TensorFlow 2.x
-    model = tf.keras.models.load_model(model_path)
-    return model
+    return keras.models.load_model('models/custom_cnn.keras', safe_mode=False)
 
 model = load_model()
 
