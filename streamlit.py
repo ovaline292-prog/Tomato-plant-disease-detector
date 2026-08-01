@@ -54,7 +54,7 @@ def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, I
 st.set_page_config(page_title="Tomato Disease Classifier", page_icon=":tomato:")
 
 st.title("Disease Detection for Tomatoes :tomato:")
-st.write("Upload an image of a tomato leaf, and I'll predict if it's healthy or has \'Tomato Yellow Leaf Curl Virus\'.")
+st.write("Upload an image of a tomato leaf, and I'll predict if it's healthy or has 'Tomato Yellow Leaf Curl Virus'.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -74,4 +74,3 @@ st.code("""
 # Your original notebook code for model training and prediction
 # This Streamlit app loads the saved 'mobilenetv3_transfer.keras' model.
 """)
-  
