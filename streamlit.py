@@ -48,7 +48,7 @@ def load_keras3_in_tf2(model_path):
     return model
 
 # Usage
-model = load_keras3_in_tf2("your_model.keras")
+model = load_keras3_in_tf2("models/mobilenetv3_transfer.keras")
 
 st.title("Tomato Plant Disease Detector")
 
