@@ -1,76 +1,175 @@
 import streamlit as st
 import tensorflow as tf
 import numpy as np
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import os
+import pandas as pd
 
-# --- Configuration --- #
+# --- Configuration & Setup ---
 IMAGE_HEIGHT = 128
 IMAGE_WIDTH = 128
-class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
+CLASS_NAMES = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
-# --- Load the Model --- #
+# --- Page Configuration ---
+st.set_page_config(
+    page_title="Tomato Plant Disease Detector",
+    page_icon="🍅",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
+st.title("🍅 Tomato Plant Disease Detector")
+st.write("Upload an image of a tomato leaf to detect if it is healthy or infected with Yellow Leaf Curl Virus.")
+
+
+# --- Custom Layer to Bypass Deserialization / Quantization Config Errors ---
+class CustomDense(tf.keras.layers.Dense):
+    """
+    Custom Dense layer wrapper to filter out unrecognized arguments like
+    'quantization_config' during model deserialization on Streamlit Cloud.
+    """
+    def __init__(self, units, activation=None, use_bias=True,
+                 kernel_initializer='glorot_uniform', bias_initializer='zeros',
+                 kernel_regularizer=None, bias_regularizer=None,
+                 activity_regularizer=None, kernel_constraint=None,
+                 bias_constraint=None, **kwargs):
+        # Filter out unrecognized deserialization kwargs
+        kwargs.pop('quantization_config', None)
+        super().__init__(units, activation=activation, use_bias=use_bias,
+                         kernel_initializer=kernel_initializer, bias_initializer=bias_initializer,
+                         kernel_regularizer=kernel_regularizer, bias_regularizer=bias_regularizer,
+                         activity_regularizer=activity_regularizer, kernel_constraint=kernel_constraint,
+                         bias_constraint=bias_constraint, **kwargs)
+
+
+# --- Safe Model Loader ---
 @st.cache_resource
-def load_model():
-    model_path = 'models/mobilenetv3_transfer.keras'
-    if not os.path.exists(model_path):
-        st.error(f"Error: Model file not found at {model_path}. Please ensure it's in your repository.")
+def load_model(model_path):
+    """Loads a Keras model while passing registered custom object overrides."""
+    custom_objects = {
+        'Dense': CustomDense
+    }
+    return tf.keras.models.load_model(model_path, custom_objects=custom_objects, safe_mode=False)
+
+
+def check_input_shape(name, model):
+    """Warn in the sidebar if the model's expected shape drifts from app settings."""
+    try:
+        shape = model.input_shape  # e.g. (None, 128, 128, 3)
+        expected = (shape[1], shape[2])
+    except Exception:
+        return
+    if expected != (IMAGE_HEIGHT, IMAGE_WIDTH):
+        st.sidebar.warning(
+            f"⚠️ {name} expects input shape {expected}, but app resizes to "
+            f"{(IMAGE_HEIGHT, IMAGE_WIDTH)}. Predictions may be unreliable."
+        )
+
+
+# --- Model Registry ---
+MODEL_REGISTRY = [
+    {"name": "Custom CNN", "path": "models/custom_cnn.keras"}
+]
+
+loaded_models = {}
+
+with st.spinner("Loading model..."):
+    for entry in MODEL_REGISTRY:
+        name, path = entry["name"], entry["path"]
+        if not os.path.exists(path):
+            st.sidebar.warning(f"{name} model not found at '{path}'")
+            continue
+        try:
+            model = load_model(path)
+            check_input_shape(name, model)
+            loaded_models[name] = model
+            st.sidebar.success(f"Loaded {name}")
+        except Exception as e:
+            st.sidebar.error(f"Error loading {name} model: {e}")
+
+
+# --- Sidebar Model Selection ---
+st.sidebar.header("Model Selection")
+
+model_to_use = None
+selected_model_name = None
+
+if loaded_models:
+    selected_model_name = st.sidebar.radio(
+        "Choose model for inference:",
+        list(loaded_models.keys()),
+        index=0
+    )
+    model_to_use = loaded_models[selected_model_name]
+else:
+    st.error("No valid models were loaded. Please verify model files in 'models/'.")
+
+
+# --- Main Image Upload & Inference Flow ---
+st.header("Upload Tomato Leaf Image")
+uploaded_file = st.file_uploader("Choose a leaf image...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None and model_to_use is not None:
+    try:
+        image = Image.open(uploaded_file).convert('RGB')
+    except UnidentifiedImageError:
+        st.error("Invalid image format. Please upload a valid JPG or PNG file.")
         st.stop()
-    model = tf.keras.models.load_model(model_path)
-    return model
+    except Exception as e:
+        st.error(f"Could not read image file: {e}")
+        st.stop()
 
-model = load_model()
-
-# --- Prediction Function (similar to your notebook) ---
-def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
-    img_resized = img.resize(image_size)
-    img_array = tf.keras.utils.img_to_array(img_resized)  # [0, 255] float32
-    img_array = np.expand_dims(img_array, axis=0)       # (1, H, W, 3)
-
-    # Preprocess for MobileNetV3 if the model expects it
-    # Assuming the loaded model already has the preprocessing layer, otherwise add it:
-    # from tensorflow.keras.applications.mobilenet_v3 import preprocess_input
-    # img_array = preprocess_input(img_array)
-
-    prob  = model.predict(img_array, verbose=0)[0][0]
-    # Assuming binary classification where prob < 0.5 is class_names[0] and prob >= 0.5 is class_names[1]
-    # Adjust this logic if your model outputs probabilities for each class (e.g., softmax)
-    # For softmax output for 2 classes, prob would be [prob_class0, prob_class1]
-    # If it's a sigmoid output for class_names[1], then:
-    # label_index = int(prob >= 0.5)
-    # label = class_names[label_index]
-
-    # Based on the notebook's predict_image, it's a sigmoid output for class_names[1]
-    if prob >= 0.5:
-        label = class_names[1] # Tomato___healthy
-        confidence = prob
-    else:
-        label = class_names[0] # Tomato___Tomato_Yellow_Leaf_Curl_Virus
-        confidence = 1 - prob
-
-    return label, confidence
-
-# --- Streamlit App --- #
-st.set_page_config(page_title="Tomato Disease Classifier", page_icon=":tomato:")
-
-st.title("Disease Detection for Tomatoes :tomato:")
-st.write("Upload an image of a tomato leaf, and I'll predict if it's healthy or has 'Tomato Yellow Leaf Curl Virus'.")
-
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert('RGB')
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
+    st.image(image, caption='Uploaded Image', use_container_width=True)
     st.write("")
-    st.write("Classifying...")
 
-    label, confidence = predict_image_streamlit(image, model, class_names)
+    # Resize image to match training specification (128x128).
+    # Raw [0, 255] float32 values are passed because the internal Rescaling layer processes them.
+    img_array = np.array(image.resize((IMAGE_WIDTH, IMAGE_HEIGHT)), dtype=np.float32)
+    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 128, 128, 3)
 
-    st.success(f"Prediction: **{label}**")
-    st.info(f"Confidence: **{confidence:.2f}**")
+    try:
+        with st.spinner("Analyzing image..."):
+            predictions = model_to_use.predict(img_array)
+    except Exception as e:
+        st.error(f"Prediction execution failed: {e}")
+        st.stop()
 
-st.markdown("--- Source Code ---")
-st.code("""
-# Your original notebook code for model training and prediction
-# This Streamlit app loads the saved 'mobilenetv3_transfer.keras' model.
+    # Calculate probabilities based on output layer configuration (Sigmoid vs Softmax)
+    if model_to_use.output_shape[-1] == 1:
+        score = float(predictions[0][0])
+        predicted_class_index = 1 if score >= 0.5 else 0
+        confidence = score if predicted_class_index == 1 else (1.0 - score)
+        probs = [1.0 - score, score]
+    else:
+        probs = predictions[0]
+        predicted_class_index = int(np.argmax(probs))
+        confidence = float(probs[predicted_class_index])
+
+    predicted_class_name = CLASS_NAMES[predicted_class_index]
+    confidence_pct = confidence * 100.0
+
+    st.subheader("Analysis Results")
+    
+    # Display result alert
+    if "healthy" in predicted_class_name.lower():
+        st.success(f"🌱 Model Prediction: **Healthy Leaf**")
+    else:
+        st.error(f"⚠️ Model Prediction: **{predicted_class_name.replace('_', ' ')}**")
+        
+    st.metric("Confidence Score", f"{confidence_pct:.2f}%")
+
+    # Output detailed raw probability dataframe
+    st.write("Detailed Class Probabilities:")
+    pred_df = pd.DataFrame({"Condition / Class": CLASS_NAMES, "Probability": probs})
+    st.dataframe(pred_df.style.format({'Probability': '{:.4f}'}))
+
+
+# --- Sidebar Information ---
+st.sidebar.markdown("""
+---
+### Deployment Checklist:
+1. GitHub repo directory layout:
+    * `streamlit.py`
+    * `models/custom_cnn.keras`
+    * `requirements.txt` containing `streamlit`, `tensorflow`, `numpy`, `Pillow`, and `pandas`.
 """)
