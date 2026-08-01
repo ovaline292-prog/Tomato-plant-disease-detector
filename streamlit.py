@@ -26,10 +26,7 @@ try:
     st.success("Model loaded successfully!")
 except Exception as e:
     st.error(f"Error loading model: {e}")
-    import keras
-
-# Load directly with standalone Keras 3
-model = keras.models.load_model("path_to_your_model.keras")
+  
 # --- Prediction Function (similar to your notebook) ---
 def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
     img_resized = img.resize(image_size)
