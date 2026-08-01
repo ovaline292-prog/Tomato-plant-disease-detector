@@ -10,14 +10,45 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
-import streamlit as st
+import json
+import zipfile
+import tempfile
+import shutil
 import tensorflow as tf
 
-@st.cache_resource
-def load_model():
-    model_path = "models/mobilenetv3_transfer.keras"
-    # Native Keras 3 load without compilation constraints
-    return tf.keras.models.load_model(model_path, compile=False)
+def load_keras3_in_tf2(model_path):
+    # 1. Create a temporary folder to extract contents
+    temp_dir = tempfile.mkdtemp()
+    
+    with zipfile.ZipFile(model_path, 'r') as zip_ref:
+        zip_ref.extractall(temp_dir)
+        
+    # 2. Read and clean config.json
+    config_path = f"{temp_dir}/config.json"
+    with open(config_path, 'r') as f:
+        config_str = f.read()
+        
+    # Remove the problematic key globally from config text
+    config_str = config_str.replace('"quantization_config": null,', '')
+    config_str = config_str.replace('"quantization_config": null', '')
+    
+    with open(config_path, 'w') as f:
+        f.write(config_str)
+        
+    # 3. Zip it back into a modified temp file
+    fixed_model_path = f"{temp_dir}/fixed_model.keras"
+    shutil.make_archive(fixed_model_path.replace('.keras', ''), 'zip', temp_dir)
+    shutil.move(f"{fixed_model_path.replace('.keras', '')}.zip", fixed_model_path)
+    
+    # 4. Load with tf.keras
+    model = tf.keras.models.load_model(fixed_model_path)
+    
+    # Cleanup temp folder
+    shutil.rmtree(temp_dir)
+    return model
+
+# Usage
+model = load_keras3_in_tf2("your_model.keras")
 
 st.title("Tomato Plant Disease Detector")
 
