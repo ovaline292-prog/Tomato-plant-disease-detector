@@ -10,30 +10,14 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
-import os
-# Must be set BEFORE importing tensorflow
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
-
 import streamlit as st
 import tensorflow as tf
 
 @st.cache_resource
 def load_model():
     model_path = "models/mobilenetv3_transfer.keras"
-    
-    # Try tf_keras first for Keras 2 back-compatibility
-    try:
-        import tf_keras
-        return tf_keras.models.load_model(model_path, compile=False)
-    except Exception:
-        pass
-
-    # Direct fallback passing safe_mode=False to allow MobileNet custom layers
-    return tf.keras.models.load_model(
-        model_path, 
-        compile=False,
-        safe_mode=False
-    )
+    # Native Keras 3 load without compilation constraints
+    return tf.keras.models.load_model(model_path, compile=False)
 
 st.title("Tomato Plant Disease Detector")
 
