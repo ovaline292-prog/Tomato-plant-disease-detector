@@ -10,28 +10,17 @@ IMAGE_WIDTH = 128
 class_names = ['Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___healthy']
 
 # --- Load the Model --- #
-
-st.title("Tomato Plant Disease Detector")
-import streamlit as st
-import keras
-from PIL import Image
-import numpy as np
-
-# Cache the model so Streamlit doesn't reload it on every user interaction
 @st.cache_resource
-def load_disease_model():
-    # Loading the Keras 3 model directly using standard keras
-    return keras.models.load_model('models/mobilenetv3_transfer.keras')
+def load_model():
+    model_path = 'models/mobilenetv3_transfer.keras'
+    if not os.path.exists(model_path):
+        st.error(f"Error: Model file not found at {model_path}. Please ensure it's in your repository.")
+        st.stop()
+    model = tf.keras.models.load_model(model_path)
+    return model
 
-model = load_disease_model()
+model = load_model()
 
-# Rest of your app logic below...
-try:
-    model = load_model()
-    st.success("Model loaded successfully!")
-except Exception as e:
-    st.error(f"Error loading model: {e}")
-  
 # --- Prediction Function (similar to your notebook) ---
 def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, IMAGE_WIDTH)):
     img_resized = img.resize(image_size)
@@ -65,7 +54,7 @@ def predict_image_streamlit(img, model, class_names, image_size=(IMAGE_HEIGHT, I
 st.set_page_config(page_title="Tomato Disease Classifier", page_icon=":tomato:")
 
 st.title("Disease Detection for Tomatoes :tomato:")
-st.write("Upload an image of a tomato leaf, and I'll predict if it's healthy or has 'Tomato Yellow Leaf Curl Virus'.")
+st.write("Upload an image of a tomato leaf, and I'll predict if it's healthy or has \'Tomato Yellow Leaf Curl Virus\'.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -85,3 +74,4 @@ st.code("""
 # Your original notebook code for model training and prediction
 # This Streamlit app loads the saved 'mobilenetv3_transfer.keras' model.
 """)
+  
