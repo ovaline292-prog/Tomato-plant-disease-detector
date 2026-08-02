@@ -45,19 +45,13 @@ class CustomDense(tf.keras.layers.Dense):
 
 # --- Safe Model Loader ---
 @st.cache_resource
-def load_model_file(model_path):
-    try:
-        # Using native keras loader with compile=False completely ignores 
-        # training/quantization metadata causing the deserialization error.
-        return keras.models.load_model(model_path, compile=False, safe_mode=False)
-    except Exception as e:
-        # Secondary fallback if Keras 3 native fails
-        return tf.keras.models.load_model(
-            model_path, 
-            custom_objects={'Dense': tf.keras.layers.Dense}, 
-            compile=False, 
-            safe_mode=False
-        )
+def load_model(model_path):
+    """Loads a TensorFlow Keras model, handling potential custom objects."""
+    custom_objects = {
+        'Dense': CustomDense  # Register our custom Dense layer for loading
+    }
+    return tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+
 
 
 def check_input_shape(name, model):
