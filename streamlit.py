@@ -61,16 +61,6 @@ def check_input_shape(name, model):
         )
 
 
-# --- TEMPORARY DIAGNOSTICS: shows exactly what's on disk and any real error ---
-with st.expander("🔧 Debug info (remove once fixed)", expanded=True):
-    st.write(f"**Working directory:** `{os.getcwd()}`")
-    st.write(f"**Files here:** {os.listdir('.')}")
-    if os.path.isdir("models"):
-        st.write(f"**Files in models/:** {os.listdir('models')}")
-    else:
-        st.error("There is no 'models/' folder next to streamlit.py in the deployed repo.")
-
-
 # --- Model Registry ---
 MODEL_REGISTRY = [
     {"name": "Custom CNN", "path": "models/custom_cnn.keras"}
