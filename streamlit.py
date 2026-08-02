@@ -23,26 +23,28 @@ st.title("🍅 Tomato Plant Disease Detector")
 st.write("Upload an image of a tomato leaf to detect if it is healthy or infected with Yellow Leaf Curl Virus.")
 
 
-# --- Custom Dense layer to tolerate a 'quantization_config' key that this ---
-# --- Keras version's Dense.__init__ doesn't accept but the saved model has ---
-class SafeDense(tf.keras.layers.Dense):
-    @classmethod
-    def from_config(cls, config):
-        config = dict(config)
-        config.pop("quantization_config", None)
-        return cls(**config)
+# --- Patch the real Dense.__init__ to tolerate a 'quantization_config' key ---
+# --- that this Keras version's Dense doesn't accept but the saved model has. ---
+# --- custom_objects does NOT intercept this: the saved config carries the   ---
+# --- built-in "keras.layers" module path, so Keras resolves the real Dense  ---
+# --- class directly instead of consulting custom_objects. Patching the      ---
+# --- actual class is the only thing that reaches every deserialization path.---
+_original_dense_init = tf.keras.layers.Dense.__init__
+
+
+def _patched_dense_init(self, *args, **kwargs):
+    kwargs.pop("quantization_config", None)
+    _original_dense_init(self, *args, **kwargs)
+
+
+tf.keras.layers.Dense.__init__ = _patched_dense_init
 
 
 # --- Safe Model Loader ---
 @st.cache_resource
 def load_model(model_path):
     """Loads a Keras model for inference only (skips optimizer reconstruction)."""
-    return tf.keras.models.load_model(
-        model_path,
-        custom_objects={"Dense": SafeDense},
-        compile=False,
-        safe_mode=False,
-    )
+    return tf.keras.models.load_model(model_path, compile=False, safe_mode=False)
 
 
 def check_input_shape(name, model):
