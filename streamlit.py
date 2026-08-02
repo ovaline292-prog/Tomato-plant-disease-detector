@@ -23,11 +23,26 @@ st.title("🍅 Tomato Plant Disease Detector")
 st.write("Upload an image of a tomato leaf to detect if it is healthy or infected with Yellow Leaf Curl Virus.")
 
 
+# --- Custom Dense layer to tolerate a 'quantization_config' key that this ---
+# --- Keras version's Dense.__init__ doesn't accept but the saved model has ---
+class SafeDense(tf.keras.layers.Dense):
+    @classmethod
+    def from_config(cls, config):
+        config = dict(config)
+        config.pop("quantization_config", None)
+        return cls(**config)
+
+
 # --- Safe Model Loader ---
 @st.cache_resource
 def load_model(model_path):
     """Loads a Keras model for inference only (skips optimizer reconstruction)."""
-    return tf.keras.models.load_model(model_path, compile=False)
+    return tf.keras.models.load_model(
+        model_path,
+        custom_objects={"Dense": SafeDense},
+        compile=False,
+        safe_mode=False,
+    )
 
 
 def check_input_shape(name, model):
