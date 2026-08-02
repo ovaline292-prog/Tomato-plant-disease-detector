@@ -44,13 +44,11 @@ class CustomDense(tf.keras.layers.Dense):
 
 
 # --- Safe Model Loader ---
+# --- Safe Model Loader ---
 @st.cache_resource
 def load_model(model_path):
-    """Loads a TensorFlow Keras model, handling potential custom objects."""
-    custom_objects = {
-        'Dense': CustomDense  # Register our custom Dense layer for loading
-    }
-    return tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+    """Loads a Keras model for inference only (skips optimizer reconstruction)."""
+    return tf.keras.models.load_model(model_path, compile=False)
 
 
 
