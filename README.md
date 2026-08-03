@@ -34,13 +34,19 @@ This repository contains an end-to-end Machine Learning pipeline and web applica
     ├── Healthy/
     └── Yellow_Leaf_Curl/
 Done
-1. 22/EG/PE/1521
-ASUQUO ELISHA MENEH
-2. 22/EG/PE/1471, Antigha, Gospel Fidelis
-3. 23/EG/PE/031
-ESHIETT PROMISE ODUDU
-4. 23/EG/PE/011
-5. IHEDI, SUCCESS CHIEMELA
-Sunday, Saviour Aniefiok 
-22/EG/PE/1541
-23/EG/PE/051, Kindness Lucky Akpan
+Group Participants
+## Group PE2
+
+| # | Full Name | Reg Number |
+|---|-----------|------------|
+| 1 | Saviour Aniefiok Sunday | 22/EG/PE/1541 |
+| 2 | Antigha, Gospel Fidelis | 22/EG/PE/1471 |
+| 3 | Effiong, Emmanuel Augustine | 22/EG/PE/1511 |
+| 4 | Agba Arinze Chinemerem | 22/EG/PE/1491 |
+| 5 | Eshiet Okon Emmanuel | 22/EG/PE/1531 |
+| 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 |
+| 7 | Eshiett Promise Odudu | 23/EG/PE/031 |
+| 8 | Umoh, Iberedem Jeriah | 23/EG/PE/001 |
+| 9 | Kindness Lucky Akpan | 23/EG/PE/051 |
+| 10 | George, Nsima Eyo | 23/EG/PE/041 |
+| 11 | Ihedi Success Chiemela | 23/EG/PE/011 |
