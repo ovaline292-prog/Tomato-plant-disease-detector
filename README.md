@@ -39,14 +39,14 @@ Group Participants
 
 | # | Full Name | Reg Number |
 |---|-----------|------------|
-| 1 | Saviour Aniefiok Sunday | 22/EG/PE/1541 |
-| 2 | Antigha, Gospel Fidelis | 22/EG/PE/1471 |
-| 3 | Effiong, Emmanuel Augustine | 22/EG/PE/1511 |
-| 4 | Agba Arinze Chinemerem | 22/EG/PE/1491 |
-| 5 | Eshiet Okon Emmanuel | 22/EG/PE/1531 |
-| 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 |
-| 7 | Eshiett Promise Odudu | 23/EG/PE/031 |
-| 8 | Umoh, Iberedem Jeriah | 23/EG/PE/001 |
-| 9 | Kindness Lucky Akpan | 23/EG/PE/051 |
-| 10 | George, Nsima Eyo | 23/EG/PE/041 |
-| 11 | Ihedi Success Chiemela | 23/EG/PE/011 |
+| 1 | Saviour Aniefiok Sunday | 22/EG/PE/1541 | Data Preparation and Preprocessing
+| 2 | Antigha, Gospel Fidelis | 22/EG/PE/1471 | Data Preparation and Preprocessing
+| 3 | Effiong, Emmanuel Augustine | 22/EG/PE/1511 | Model Development and Training
+| 4 | Agba Arinze Chinemerem | 22/EG/PE/1491 | Model Development and Training
+| 5 | Eshiet Okon Emmanuel | 22/EG/PE/1531 | Model Evaluation
+| 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 | Mod Odudu
+| 7 | Eshiett Promise Odudu | 23/EG/PE/031 | Application Development
+| 8 | Umoh, Iberedem Jeriah | 23/EG/PE/| Application Development
+| 9 | Kindness Lucky Akpan | 23/EG/PE/051 | Cloud Deployment
+| 10 | George, Nsima Eyo | 23/EG/PE/041 | Cloud Deployment 
+| 11 | Ihedi Success Chiemela | 23/EG/PE/011 | Documentation and report writing
