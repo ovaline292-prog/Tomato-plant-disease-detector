@@ -44,7 +44,7 @@ Group Participants
 | 3 | Effiong, Emmanuel Augustine | 22/EG/PE/1511 | Model Development and Training
 | 4 | Agba Arinze Chinemerem | 22/EG/PE/1491 | Model Development and Training
 | 5 | Eshiet Okon Emmanuel | 22/EG/PE/1531 | Model Evaluation
-| 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 | Mod Odudu
+| 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 | Model Evaluation
 | 7 | Eshiett Promise Odudu | 23/EG/PE/031 | Application Development
 | 8 | Umoh, Iberedem Jeriah | 23/EG/PE/001| Application Development
 | 9 | Kindness Lucky Akpan | 23/EG/PE/051 | Cloud Deployment
