@@ -1,4 +1,4 @@
-# 🍅 Tomato Leaf Disease Classification System (Healthy vs. TYLCV)
+Iberedemification System (Healthy vs. TYLCV)
 
 > **GET 324: Cloud Computing & AI Model Deployment for Engineering Applications**  
 > **Laboratory Exercise 10 (Mini-Project) — 15 Marks**
@@ -46,7 +46,7 @@ Group Participants
 | 5 | Eshiet Okon Emmanuel | 22/EG/PE/1531 | Model Evaluation
 | 6 | Asuquo Elisha Meneh | 22/EG/PE/1521 | Mod Odudu
 | 7 | Eshiett Promise Odudu | 23/EG/PE/031 | Application Development
-| 8 | Umoh, Iberedem Jeriah | 23/EG/PE/| Application Development
+| 8 | Umoh, Iberedem Jeriah | 23/EG/PE/001| Application Development
 | 9 | Kindness Lucky Akpan | 23/EG/PE/051 | Cloud Deployment
 | 10 | George, Nsima Eyo | 23/EG/PE/041 | Cloud Deployment 
 | 11 | Ihedi Success Chiemela | 23/EG/PE/011 | Documentation and report writing
